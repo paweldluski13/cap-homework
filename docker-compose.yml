@@ -1,0 +1,80 @@
+services:
+  ########################################
+  ########### REVERSE-PROXY ##############
+  ########################################
+  traefik:
+    image: ${TRAEFIK}
+    command: --api.insecure=true --providers.docker=true #Enables the web UI and tells Træfik to listen to docker
+    ports:
+      - "80:80" #The HTTP port
+      - "8082:8080" #The Web UI (enabled by --api)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock #so Traefik can listen to the Docker events
+      - ./init-data/traefik/traefik-conf.yml:/etc/traefik/traefik.yml
+      - ./init-data/traefik/traefik-services.yml:/etc/traefik/services.yml
+        #labels:
+        #- "traefik.http.routers.local_mfe.entrypoints=web"
+        #- "traefik.http.routers.local_mfe.rule=Host(`local-proxy`)&&PathPrefix(`/mfe/onecx-theme-ui`)"
+        #- "traefik.http.routers.local_mfe.service=local_mfe@file"
+        ## Localy running BFF has to be started with port 8585
+        #- "traefik.http.routers.local_bff.entrypoints=web"
+        #- "traefik.http.routers.local_bff.rule=Host(`onecx-theme-bff`)"
+      #- "traefik.http.routers.local_bff.service=local_bff@file"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - example
+
+  ########################################
+  ############### DATABASE ###############
+  ########################################
+  postgresdb:
+    image: ${POSTGRES}
+    container_name: postgresdb
+    command: [-cmax_prepared_transactions=100]
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: admin
+      # POSTGRES_DB: postgres
+      # POSTGRES_USER: postgres
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./init-data/db:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      traefik:
+        condition: service_started
+    labels:
+      - "traefik.http.services.postgresdb.loadbalancer.server.port=5432"
+      - "traefik.http.routers.postgresdb.rule=Host(`postgresdb`)"
+    networks:
+      - example
+
+  pgadmin:
+    image: ${PGADMIN}
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user@example.com
+      PGADMIN_DEFAULT_PASSWORD: mysecretpassword
+    volumes:
+      - ./init-data/pgadmin/servers.json:/pgadmin4/servers.json
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+    labels:
+      - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
+      - "traefik.http.routers.pgadmin.rule=Host(`pgadmin`)"
+    networks:
+      - example
+    profiles:
+      - all
+
+volumes:
+  postgres:
+
+networks:
+  example:
