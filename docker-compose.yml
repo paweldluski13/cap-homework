@@ -4,22 +4,14 @@ services:
   ########################################
   traefik:
     image: ${TRAEFIK}
-    command: --api.insecure=true --providers.docker=true #Enables the web UI and tells Træfik to listen to docker
+    command: --api.insecure=true --providers.docker=true
     ports:
-      - "80:80" #The HTTP port
-      - "8082:8080" #The Web UI (enabled by --api)
+      - "80:80"
+      - "8082:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock #so Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
       - ./init-data/traefik/traefik-conf.yml:/etc/traefik/traefik.yml
       - ./init-data/traefik/traefik-services.yml:/etc/traefik/services.yml
-        #labels:
-        #- "traefik.http.routers.local_mfe.entrypoints=web"
-        #- "traefik.http.routers.local_mfe.rule=Host(`local-proxy`)&&PathPrefix(`/mfe/onecx-theme-ui`)"
-        #- "traefik.http.routers.local_mfe.service=local_mfe@file"
-        ## Localy running BFF has to be started with port 8585
-        #- "traefik.http.routers.local_bff.entrypoints=web"
-        #- "traefik.http.routers.local_bff.rule=Host(`onecx-theme-bff`)"
-      #- "traefik.http.routers.local_bff.service=local_bff@file"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
@@ -36,8 +28,6 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_PASSWORD: admin
-      # POSTGRES_DB: postgres
-      # POSTGRES_USER: postgres
     volumes:
       - postgres:/var/lib/postgresql/data
       - ./init-data/db:/docker-entrypoint-initdb.d/

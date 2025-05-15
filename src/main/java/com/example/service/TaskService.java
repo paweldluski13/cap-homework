@@ -12,4 +12,8 @@ public interface TaskService {
     void deleteById(Long id);
 
     Task createTask(Task task);
+
+    Task generateRandomTask();
+
+    void deleteAllTasks();
 }

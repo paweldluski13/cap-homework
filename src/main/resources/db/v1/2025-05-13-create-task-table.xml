@@ -6,7 +6,7 @@
         objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
     <changeSet author="dev (generated)" id="1725456741898-1">
         <createTable tableName="task">
-            <column name="id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="title" type="VARCHAR(255)">
@@ -21,7 +21,20 @@
 
     <changeSet author="dev (adjusted)" id="20250513-3">
         <createSequence sequenceName="task_SEQ"
-            startValue="1"
-            incrementBy="50"/>
+                        startValue="1"
+                        incrementBy="50"/>
+    </changeSet>
+
+    <changeSet author="dev (init)" id="20250515-1">
+        <insert tableName="task">
+            <column name="title" value="Initial Task 1"/>
+            <column name="status" value="OPEN"/>
+            <column name="createdAt" valueDate="2025-05-15T10:00:00"/>
+        </insert>
+        <insert tableName="task">
+            <column name="title" value="Initial Task 2"/>
+            <column name="status" value="CLOSED"/>
+            <column name="createdAt" valueDate="2025-05-15T10:05:00"/>
+        </insert>
     </changeSet>
 </databaseChangeLog>

@@ -120,4 +120,34 @@ class TaskServiceImplIntegrationTest {
         assertThrows(EntityNotFoundException.class, () -> taskService.getTaskById(created.id));
     }
 
+    @Test
+    @Transactional
+    void shouldDeleteAllTasks() {
+        //given
+        Task testTask = Task.builder()
+                .title("Test task")
+                .status(Status.OPEN)
+                .build();
+
+        Task testTask1 = Task.builder()
+                .title("Test task")
+                .status(Status.OPEN)
+                .build();
+
+        Task testTask2 = Task.builder()
+                .title("Test task")
+                .status(Status.CLOSED)
+                .build();
+
+        taskRepository.persist(List.of(testTask, testTask1, testTask2));
+
+
+        //when
+        taskService.deleteAllTasks();
+
+        //then
+        List<Task> tasksResults = taskRepository.listAll();
+        assertEquals(0, tasksResults.size());
+    }
+
 }

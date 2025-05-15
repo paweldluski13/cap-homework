@@ -146,5 +146,15 @@ class TaskResourceTest {
         verifyNoInteractions(taskService);
     }
 
+    @Test
+    void shouldDeleteAllTasks() {
+        //when
+        Response response = taskResource.deleteAllTasks();
+
+        //then
+        assertEquals(204, response.getStatus());
+        verify(taskService).deleteAllTasks();
+    }
+
 
 }

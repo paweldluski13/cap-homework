@@ -40,4 +40,16 @@ public class TaskResource {
     public TaskDto saveTask(TaskDto taskDto) {
         return taskMapper.toDto(taskService.createTask(taskMapper.toDao(taskDto)));
     }
+
+    @GET
+    @Path("/generateRandomTask")
+    public TaskDto generateRandomTask() {
+        return taskMapper.toDto(taskService.generateRandomTask());
+    }
+
+    @DELETE
+    public Response deleteAllTasks() {
+        taskService.deleteAllTasks();
+        return Response.noContent().build();
+    }
 }
